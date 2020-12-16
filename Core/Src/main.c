@@ -62,7 +62,7 @@ uint8_t mDataRead[6 + 2 + 6];
 int8_t receivedData[3];  // kintamasis duomenu gavimui is kompiuterio
 uint8_t Receiveflag;  // veleveles
 uint8_t spiTXbuf[2], data_acc_gyr[12];  // jutiklio nuskaitymui reikalingi kintamieji
-		/* USER CODE END PV */
+/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -74,7 +74,8 @@ static void MX_TIM2_Init(void);
 void CDC_ReceiveCallback(uint8_t *Buf, uint32_t Len) {
 	//CDC_Transmit_FS(mDataRead, 14);
 	Receiveflag = 1;
-	memcpy(receivedData, buf, strlen((char*) buf));
+//	memcpy(receivedData, Buf, strlen((char*) Buf));
+	CDC_Transmit_FS(mDataRead, 14);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -94,7 +95,6 @@ void Motors_Control(int8_t DutyCycleA, int8_t DutyCycleB) {
 	if (DutyCycleA > 0 && DutyCycleB > 0) {
 		out1_out3(GPIO_PIN_RESET);
 		out2_out4(GPIO_PIN_SET);
-
 	}
 
 	// moving backward
@@ -128,7 +128,7 @@ void Motors_Control(int8_t DutyCycleA, int8_t DutyCycleB) {
  */
 void checking_package(uint8_t data_request) {
 	if (data_request == 'M') Motors_Control(receivedData[1], receivedData[2]);
-	else CDC_Transmit_FS(data_acc_gyr, strlen((char*) data_acc_gyr));
+	else CDC_Transmit_FS(mDataRead, 14);
 }
 /* USER CODE END PFP */
 
@@ -185,14 +185,10 @@ int main(void) {
 		HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR << 1, ACCEL_XOUT_H_REG, 1, mDataRead, 6 + 2 + 6, 10);
 		HAL_Delay(10);
 
-		//apdoroti nuskaitytus duomenis
-		if (mFlags.accDataReady) {
-		}
-
-		if (Receiveflag == 1) {
-			Receiveflag = 0;
-			checking_package(receivedData[0]);
-		}
+//		if (Receiveflag == 1) {
+//			Receiveflag = 0;
+//			checking_package(receivedData[0]);
+//		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -291,9 +287,9 @@ static void MX_TIM2_Init(void) {
 
 	/* USER CODE END TIM2_Init 1 */
 	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = 48;
+	htim2.Init.Prescaler = 480;
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim2.Init.Period = 65535;
+	htim2.Init.Period = 100;
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {

@@ -1,7 +1,5 @@
 #include "AccGyro.h"
 
-
-
 void AG_start(I2C_HandleTypeDef *i2c_instance) {
 #if Gyro_FullScale==250
 	uint8_t gyroFS = 0;
@@ -49,7 +47,7 @@ void AG_start(I2C_HandleTypeDef *i2c_instance) {
 	I2C_Write8(INT_PIN_CFG, (1 << 4) | (1 << 5));
 
 	//enable interupt
-	I2C_Write8(INT_ENABLE_REG, 0);
+	I2C_Write8(INT_ENABLE_REG, 1);
 }
 
 void AG_AddNewValues(int16_t x, int16_t y, int16_t z) {
