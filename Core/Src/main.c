@@ -74,8 +74,7 @@ static void MX_TIM2_Init(void);
 void CDC_ReceiveCallback(uint8_t *Buf, uint32_t Len) {
 	//CDC_Transmit_FS(mDataRead, 14);
 	Receiveflag = 1;
-//	memcpy(receivedData, Buf, strlen((char*) Buf));
-	CDC_Transmit_FS(mDataRead, 14);
+	memcpy(receivedData, Buf, strlen((char*) Buf));
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -181,14 +180,13 @@ int main(void) {
 		//nuskaityti duomenis is akselerometro ir giroskopo kai duomenys paruosti
 		if (mFlags.accDataReadyRead) {
 			mFlags.accDataReadyRead = 0;
+			HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR << 1, ACCEL_XOUT_H_REG, 1, mDataRead, 6 + 2 + 6, 10);
 		}
-		HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR << 1, ACCEL_XOUT_H_REG, 1, mDataRead, 6 + 2 + 6, 10);
-		HAL_Delay(10);
 
-//		if (Receiveflag == 1) {
-//			Receiveflag = 0;
-//			checking_package(receivedData[0]);
-//		}
+		if (Receiveflag == 1) {
+			Receiveflag = 0;
+			checking_package(receivedData[0]);
+		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

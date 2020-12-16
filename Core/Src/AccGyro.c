@@ -41,7 +41,7 @@ void AG_start(I2C_HandleTypeDef *i2c_instance) {
 	I2C_Write8(ACCEL_CONFIG_REG, accFS << 3);
 
 	//Set SRD To Default
-	I2C_Write8(SMPLRT_DIV_REG, 8);
+	I2C_Write8(SMPLRT_DIV_REG, 0);
 
 	//clear flag after read
 	I2C_Write8(INT_PIN_CFG, (1 << 4) | (1 << 5));
