@@ -59,7 +59,7 @@ struct {
 
 uint8_t mDataRead[6 + 2 + 6];
 
-int8_t receivedData[3];  // kintamasis duomenu gavimui is kompiuterio
+int8_t receivedData[50];  // kintamasis duomenu gavimui is kompiuterio
 uint8_t Receiveflag;  // veleveles
 uint8_t spiTXbuf[2], data_acc_gyr[12];  // jutiklio nuskaitymui reikalingi kintamieji
 /* USER CODE END PV */
@@ -72,9 +72,12 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 void CDC_ReceiveCallback(uint8_t *Buf, uint32_t Len) {
-	//CDC_Transmit_FS(mDataRead, 14);
 	Receiveflag = 1;
-	memcpy(receivedData, Buf, strlen((char*) Buf));
+	memset(receivedData,0,50);
+	memcpy(receivedData, Buf, Len);
+
+	HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR << 1, ACCEL_XOUT_H_REG, 1, mDataRead, 6 + 2 + 6, 1);
+//	CDC_Transmit_FS(mDataRead, 14);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -127,7 +130,9 @@ void Motors_Control(int8_t DutyCycleA, int8_t DutyCycleB) {
  */
 void checking_package(uint8_t data_request) {
 	if (data_request == 'M') Motors_Control(receivedData[1], receivedData[2]);
-	else CDC_Transmit_FS(mDataRead, 14);
+	else {
+		CDC_Transmit_FS(mDataRead, 14);
+	}
 }
 /* USER CODE END PFP */
 
@@ -171,6 +176,9 @@ int main(void) {
 
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);  // paleidziami laikmaciai PWM signalo generavimui
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+
+	htim2.Instance->CCR1 = 5;  // Motor A speed control
+	htim2.Instance->CCR2 = 5;  // Motor B speed control
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -180,7 +188,6 @@ int main(void) {
 		//nuskaityti duomenis is akselerometro ir giroskopo kai duomenys paruosti
 		if (mFlags.accDataReadyRead) {
 			mFlags.accDataReadyRead = 0;
-			HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR << 1, ACCEL_XOUT_H_REG, 1, mDataRead, 6 + 2 + 6, 10);
 		}
 
 		if (Receiveflag == 1) {
@@ -376,18 +383,18 @@ void Error_Handler(void) {
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
+	/* USER CODE BEGIN 6 */
+	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+	/* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
 

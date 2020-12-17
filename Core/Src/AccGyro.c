@@ -47,7 +47,7 @@ void AG_start(I2C_HandleTypeDef *i2c_instance) {
 	I2C_Write8(INT_PIN_CFG, (1 << 4) | (1 << 5));
 
 	//enable interupt
-	I2C_Write8(INT_ENABLE_REG, 1);
+	I2C_Write8(INT_ENABLE_REG, 0);
 }
 
 void AG_AddNewValues(int16_t x, int16_t y, int16_t z) {
