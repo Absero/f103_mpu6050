@@ -77,7 +77,6 @@ void CDC_ReceiveCallback(uint8_t *Buf, uint32_t Len) {
 	memcpy(receivedData, Buf, Len);
 
 	HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR << 1, ACCEL_XOUT_H_REG, 1, mDataRead, 6 + 2 + 6, 1);
-//	CDC_Transmit_FS(mDataRead, 14);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
