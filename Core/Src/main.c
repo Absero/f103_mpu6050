@@ -38,6 +38,17 @@
 #define out2_out4(b) HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5 | GPIO_PIN_7, b)
 #define out1_out4(c) HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4 | GPIO_PIN_7, c)
 #define out2_out3(d) HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5 | GPIO_PIN_6, d)
+
+#define MOTOR_SET_L(x) do{\
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, (x));\
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, !(x));\
+	}while(0)
+
+#define MOTOR_SET_R(x) do{\
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, (x));\
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !(x));\
+	}while(0)
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -83,44 +94,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	mFlags.accDataReadyRead = 1;
 }
 
+
 /**
  ******************************************************************************
  * @note funkcija kuri kontroluoja motoru sukimosi krypti
-
  */
 void Motors_Control(int8_t DutyCycleA, int8_t DutyCycleB) {
 	htim2.Instance->CCR1 = abs(DutyCycleA);  // Motor A speed control
 	htim2.Instance->CCR2 = abs(DutyCycleB);  // Motor B speed control
 
-	// moving forward
-	if (DutyCycleA > 0 && DutyCycleB > 0) {
-		out1_out3(GPIO_PIN_RESET);
-		out2_out4(GPIO_PIN_SET);
-	}
-
-	// moving backward
-	if (DutyCycleA < 0 && DutyCycleB < 0) {
-		out1_out3(GPIO_PIN_SET);
-		out2_out4(GPIO_PIN_RESET);
-	}
-
-	// stop
-	if (DutyCycleA == 0 && DutyCycleB == 0) {
-		out1_out3(GPIO_PIN_RESET);
-		out2_out4(GPIO_PIN_RESET);
-	}
-
-	// moving to left
-	if (DutyCycleA < 0 && DutyCycleB > 0) {
-		out1_out4(GPIO_PIN_SET);
-		out2_out3(GPIO_PIN_RESET);
-	}
-
-	// moving to right
-	if (DutyCycleA > 0 && DutyCycleB < 0) {
-		out1_out4(GPIO_PIN_RESET);
-		out2_out3(GPIO_PIN_SET);
-	}
+	MOTOR_SET_L(DutyCycleA >= 0);
+	MOTOR_SET_R(DutyCycleB >= 0);
 }
 /**
  ******************************************************************************
